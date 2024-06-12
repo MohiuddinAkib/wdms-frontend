@@ -10,7 +10,9 @@ import {
   CardContent,
   CardActions,
   CircularProgress,
+  Link,
 } from "@mui/material";
+import AppLink from "@/components/ui/AppLink";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -115,7 +117,13 @@ function LoginPage() {
               </div>
             </div>
           </CardContent>
-          <CardActions className="justify-end">
+          <CardActions className="justify-between">
+            <div>
+              <Link component={AppLink} to={"/auth/register"}>
+                Don't have account?
+              </Link>
+            </div>
+
             <Button
               type={"submit"}
               disableElevation
