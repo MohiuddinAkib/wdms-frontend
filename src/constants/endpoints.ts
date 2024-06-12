@@ -18,6 +18,14 @@ export function makeGetWalletListEndpoint() {
     return "wallets" as const;
 }
 
+export function makeGetCurrencyListEndpoint() {
+    return "currencies" as const;
+}
+
+export function makeCreateWalletEndpoint() {
+    return "wallets" as const;
+}
+
 export function makeGetUserProfileEndpoint() {
     return "user" as const;
 }

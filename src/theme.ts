@@ -5,6 +5,9 @@ const rootElement = document.getElementById("root")!;
 export const root = createRoot(rootElement);
 
 export const theme = createTheme({
+    typography: {
+        fontFamily: "Montserrat",
+    },
     components: {
         MuiPopover: {
             defaultProps: {

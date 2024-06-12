@@ -4,14 +4,13 @@ import AppLink from "@/components/ui/AppLink";
 import { useNavigate } from "react-router-dom";
 import { useRequestOtpMutation } from "@/hooks/auth";
 import { Controller, useForm } from "react-hook-form";
+import LoadableButton from "@/components/ui/LoadableButton";
 import {
   Card,
-  Button,
   TextField,
   CardHeader,
   CardContent,
   CardActions,
-  CircularProgress,
   Link,
 } from "@mui/material";
 
@@ -132,19 +131,14 @@ function LoginPage() {
               </Link>
             </div>
 
-            <Button
+            <LoadableButton
               type={"submit"}
               disableElevation
               variant="contained"
-              disabled={isPending}
-              startIcon={
-                isPending ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : undefined
-              }
+              loading={isPending}
             >
               Submit
-            </Button>
+            </LoadableButton>
           </CardActions>
         </form>
       </Card>

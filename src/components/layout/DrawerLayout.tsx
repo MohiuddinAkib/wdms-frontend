@@ -60,7 +60,7 @@ function DrawerLayout() {
     logout(undefined, {
       async onSuccess() {
         await queryClient.invalidateQueries({
-          queryKey: [useGetAuthDataQuery.getKey()],
+          queryKey: useGetAuthDataQuery.getKey(),
         });
         queryClient.removeQueries();
       },
@@ -70,7 +70,7 @@ function DrawerLayout() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
       {/* <Drawer
         anchor={"left"}
         open={openDrawer}
@@ -97,7 +97,7 @@ function DrawerLayout() {
         </List>
       </Drawer> */}
 
-      <main>
+      <main className="min-h-screen">
         <AppBar elevation={0} position={"relative"}>
           <Container maxWidth={"xl"}>
             <Toolbar disableGutters>

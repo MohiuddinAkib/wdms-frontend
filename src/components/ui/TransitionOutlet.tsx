@@ -9,7 +9,7 @@ function TransitionOutlet() {
   return (
     <SwitchTransition>
       <Fade timeout={300} key={location.key}>
-        <span>{currentOutlet}</span>
+        <span className="h-full">{currentOutlet}</span>
       </Fade>
     </SwitchTransition>
   );

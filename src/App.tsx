@@ -8,6 +8,12 @@ import { Route, Routes } from "react-router-dom";
 import AuthLayout from "@components/layout/AuthLayout";
 import DrawerLayout from "@/components/layout/DrawerLayout";
 
+// wallet create kra
+// denomination add kra
+// money add kra
+// withdraw kra
+// transaction list dekha
+
 function App() {
   return (
     <Routes>

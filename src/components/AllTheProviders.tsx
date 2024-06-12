@@ -22,7 +22,10 @@ function AllTheProviders({ children }: React.PropsWithChildren) {
         <SnackbarProvider>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>{children}</BrowserRouter>
-            <ReactQueryDevtools initialIsOpen={false} />
+            <ReactQueryDevtools
+              initialIsOpen={false}
+              buttonPosition="bottom-left"
+            />
           </QueryClientProvider>
         </SnackbarProvider>
       </ThemeProvider>

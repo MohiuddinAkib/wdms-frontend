@@ -160,3 +160,9 @@ export type WalletResource = {
     denominations?: Array<WalletDenominationResource>;
 };
 
+
+
+export type GetCurrenciesResponse = {
+    success: boolean;
+    data: CurrencyResource[]
+}
