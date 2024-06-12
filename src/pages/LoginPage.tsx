@@ -1,4 +1,6 @@
 import { useSnackbar } from "notistack";
+import { getCsrfToken } from "@/utils/http";
+import AppLink from "@/components/ui/AppLink";
 import { useNavigate } from "react-router-dom";
 import { useRequestOtpMutation } from "@/hooks/auth";
 import { Controller, useForm } from "react-hook-form";
@@ -12,7 +14,6 @@ import {
   CircularProgress,
   Link,
 } from "@mui/material";
-import AppLink from "@/components/ui/AppLink";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -25,7 +26,9 @@ function LoginPage() {
     },
   });
 
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = handleSubmit(async (values) => {
+    await getCsrfToken();
+
     requestOtp(values, {
       onError(error) {
         if ("email" in error.field_errors) {
@@ -41,6 +44,11 @@ function LoginPage() {
             message: error.field_errors.password,
           });
         }
+
+        enqueueSnackbar({
+          message: error.non_field_error,
+          variant: "error",
+        });
       },
       onSuccess(data) {
         reset();

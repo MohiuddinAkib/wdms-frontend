@@ -55,7 +55,7 @@ function OtpPage() {
 
   const onSubmit = handleSubmit((values) => {
     const email =
-      location.state.email ??
+      location.state?.email ??
       new URLSearchParams(location.search).get("email") ??
       "";
 
@@ -80,6 +80,11 @@ function OtpPage() {
               message: error.field_errors.email,
             });
           }
+
+          enqueueSnackbar({
+            message: error.non_field_error,
+            variant: "error",
+          });
         },
         onSuccess(data) {
           reset();
@@ -89,7 +94,8 @@ function OtpPage() {
           });
 
           storeAuthData({
-            token: data.token!,
+            isLoggedin: true,
+            token: data.token,
           });
         },
       }

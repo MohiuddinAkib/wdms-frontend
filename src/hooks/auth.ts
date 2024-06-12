@@ -2,9 +2,9 @@ import localforage from "localforage";
 import { createMutation, createQuery } from "react-query-kit";
 import { StoredAuthData } from "@/types/app-contract";
 import { QueryKeys, StorageKeys } from "@/constants/keys";
-import { LoginUserData, LoginUserResponseResource, RegisterUserData, RegisterUserResponseResource, RequestOtpData, RequestOtpResponseResource } from "@/types/api-response";
+import { LoginUserData, LoginUserResponseResource, RegisterUserData, RegisterUserResponseResource, RequestOtpData, RequestOtpResponseResource, UserData, UserLogoutResponseResource } from "@/types/api-response";
 import { apiClientV1 } from "@/utils/http";
-import { makeLoginEndpoint, makeRegisterEndpoint, makeRequestOtpEndpoint } from "@/constants/endpoints";
+import { makeGetUserProfileEndpoint, makeLoginEndpoint, makeLogoutEndpoint, makeRegisterEndpoint, makeRequestOtpEndpoint } from "@/constants/endpoints";
 import { AxiosResponse } from "axios";
 
 export const useGetAuthDataQuery = createQuery<
@@ -52,10 +52,39 @@ export const useStoreAuthDataMutation = createMutation<
     Error
 >({
     networkMode: "always",
-    async mutationFn(data) {
-        return await localforage.setItem<StoredAuthData>(
+    mutationFn(data) {
+        console.log("hahah")
+        return localforage.setItem<StoredAuthData>(
             StorageKeys.AUTH_DATA,
             data,
         );
+    },
+});
+
+export const useLogoutMutation = createMutation<
+    UserLogoutResponseResource
+>({
+    async mutationFn() {
+        const [response] = await Promise.all([
+            apiClientV1.post(makeLogoutEndpoint()),
+            localforage.removeItem(StorageKeys.AUTH_DATA)
+        ]);
+
+        return response.data
+    },
+});
+
+export const useGetUserProfileDataMutation = createQuery<
+    UserData
+>({
+    queryKey: [QueryKeys.USER_PROFILE_DATA],
+    async fetcher() {
+        const response = await apiClientV1.get<UserData>(
+            makeGetUserProfileEndpoint(),
+        )
+
+
+
+        return response.data
     },
 });

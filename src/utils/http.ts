@@ -2,18 +2,44 @@ import { csrfMutex } from "./mutex";
 import localforage from "localforage";
 import { StorageKeys } from "@/constants/keys";
 import { ErrorResponse, } from "@/types/api-response";
-import axios, { AxiosError, HttpStatusCode } from "axios";
+import axios, { AxiosError, HttpStatusCode, InternalAxiosRequestConfig } from "axios";
 import { ApplicationError, StoredAuthData } from "@/types/app-contract";
 
-const API_V1_BASE_URL = new URL("api", import.meta.env.VITE_APP_API_BASE ?? "http://localhost/api");
+const API_V1_BASE_URL = new URL("api", import.meta.env.VITE_APP_API_BASE ?? "http://localhost");
 
-function getCsrfToken() {
-  return axios.get(
-    `${API_V1_BASE_URL.toString()}/sanctum/csrf-cookie`,
-    {
-      withCredentials: true,
+export async function getCsrfToken() {
+  if (!csrfMutex.isLocked()) {
+    console.log("lock nai");
+
+    const release = await csrfMutex.acquire();
+
+    console.log("lock krlm");
+
+    try {
+      console.log("/sanctum/csrf-cookie e hit kre csrf token anbo");
+
+      await axios.get(
+        `${import.meta.env.VITE_APP_API_BASE ?? "http://localhost"}/sanctum/csrf-cookie`,
+        {
+          withXSRFToken: true,
+          withCredentials: true,
+        }
+      )
+
+      console.log("/sanctum/csrf-cookie theke csrf token anlam");
+    } finally {
+      // release must be called once the mutex should be released again.
+      release();
     }
-  );
+  } else {
+    console.log("lock ty wait krtesi");
+
+    // wait until the mutex is available without locking it
+    await csrfMutex.waitForUnlock();
+    console.log(
+      "lock chilo wait krar pore request ta abar try kre dektesi"
+    );
+  }
 }
 
 function makeApplicationError(
@@ -53,6 +79,7 @@ function makeApplicationError(
 }
 
 const apiClientV1 = axios.create({
+  withXSRFToken: true,
   withCredentials: true,
   baseURL: API_V1_BASE_URL.toString(),
   headers: {
@@ -89,58 +116,17 @@ apiClientV1.interceptors.response.use(
     const applicationError = makeApplicationError(error);
     const isCsrfMismatch = applicationError.statusCode === 419
 
-    const originalConfig = error.config
+    const originalConfig = error.config! as InternalAxiosRequestConfig & { _retry: number }
+    if (originalConfig._retry === undefined) {
+      originalConfig._retry = 0;
+    }
 
-    if (isCsrfMismatch) {
-      if (!csrfMutex.isLocked()) {
-        console.log("lock nai");
 
-        const release = await csrfMutex.acquire();
+    if (isCsrfMismatch && originalConfig._retry < 5) {
+      originalConfig._retry++;
+      await getCsrfToken();
 
-        console.log("lock krlm");
-
-        try {
-          console.log("/sanctum/csrf-cookie e hit kre csrf token anbo");
-
-          await getCsrfToken();
-
-          console.log("/sanctum/csrf-cookie theke csrf token anlam");
-
-          // retry the initial query
-          return apiClientV1({
-            ...originalConfig
-          }).catch((_error) => {
-            release();
-
-            if (_error.response && _error.response.data) {
-              return Promise.reject(_error.response.data);
-            }
-
-            return Promise.reject(_error);
-          });
-        } finally {
-          // release must be called once the mutex should be released again.
-          release();
-        }
-      } else {
-        console.log("lock ty wait krtesi");
-
-        // wait until the mutex is available without locking it
-        await csrfMutex.waitForUnlock();
-        console.log(
-          "lock chilo wait krar pore request ta abar try kre dektesi"
-        );
-
-        return apiClientV1({
-          ...originalConfig
-        }).catch((_error) => {
-          if (_error.response && _error.response.data) {
-            return Promise.reject(_error.response.data);
-          }
-
-          return Promise.reject(_error);
-        });
-      }
+      return apiClientV1(originalConfig);
     }
 
     return Promise.reject(applicationError);

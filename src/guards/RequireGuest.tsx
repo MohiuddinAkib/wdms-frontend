@@ -15,7 +15,7 @@ function RequireGuest({ children }: React.PropsWithChildren) {
     return <div>{error.message}</div>;
   }
 
-  if (authData) {
+  if (authData?.isLoggedin) {
     return <Navigate replace to={location.state?.nextPage || "/"} />;
   }
 

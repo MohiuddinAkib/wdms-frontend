@@ -15,7 +15,7 @@ function RequireAuth({ children }: React.PropsWithChildren) {
     return <div>{error.message}</div>;
   }
 
-  if (!authData) {
+  if (!authData?.isLoggedin) {
     return (
       <Navigate
         replace

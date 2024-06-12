@@ -6,5 +6,6 @@ export interface ApplicationError<TFields extends string = string> {
 }
 
 export type StoredAuthData = {
-    token: string;
+    token?: string | null;
+    isLoggedin: boolean;
 }

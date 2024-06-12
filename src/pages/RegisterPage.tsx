@@ -59,6 +59,11 @@ function RegisterPage() {
             message: error.field_errors.password,
           });
         }
+
+        enqueueSnackbar({
+          message: error.non_field_error,
+          variant: "error",
+        });
       },
       onSuccess(data) {
         reset();
