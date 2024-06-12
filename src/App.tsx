@@ -6,9 +6,9 @@ import RegisterPage from "@/pages/RegisterPage";
 import RequireGuest from "@/guards/RequireGuest";
 import { Route, Routes } from "react-router-dom";
 import AuthLayout from "@components/layout/AuthLayout";
+import WalletDetailsPage from "@/pages/WalletDetailsPage";
 import DrawerLayout from "@/components/layout/DrawerLayout";
 
-// wallet create kra
 // denomination add kra
 // money add kra
 // withdraw kra
@@ -25,6 +25,7 @@ function App() {
         }
       >
         <Route path="/" element={<HomePage />} />
+        <Route path="/wallets/:walletId" element={<WalletDetailsPage />} />
       </Route>
 
       <Route

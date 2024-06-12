@@ -166,3 +166,8 @@ export type GetCurrenciesResponse = {
     success: boolean;
     data: CurrencyResource[]
 }
+
+export type GetDenominationsResponse = {
+    success: boolean;
+    data: DenominationResource[]
+}

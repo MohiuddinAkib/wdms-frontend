@@ -11,7 +11,9 @@ import {
   Typography,
   CardContent,
   CardHeader,
+  CardActionArea,
 } from "@mui/material";
+import AppLink from "@/components/ui/AppLink";
 
 function HomePage() {
   const [open, setOpen] = React.useState(false);
@@ -41,16 +43,21 @@ function HomePage() {
           <Typography align="center">No Wallet Created</Typography>
         </div>
       ) : (
-        <Grid container className="mt-2">
+        <Grid container className="mt-2" spacing={2}>
           {wallets?.data?.map((eachWallet, i) => (
             <Grid item lg={4} xs={12} sm={6} key={eachWallet.id}>
-              <Card variant="outlined">
-                <CardHeader title={`Wallet #${i}`} />
-                <CardContent>
-                  <Typography>Currency: {eachWallet.currency}</Typography>
-                  <Typography>Balance: {eachWallet.balance}</Typography>
-                </CardContent>
-              </Card>
+              <CardActionArea
+                component={AppLink}
+                to={`/wallets/${eachWallet.id}`}
+              >
+                <Card variant="outlined">
+                  <CardHeader title={`Wallet #${i}`} />
+                  <CardContent>
+                    <Typography>Currency: {eachWallet.currency}</Typography>
+                    <Typography>Balance: {eachWallet.balance}</Typography>
+                  </CardContent>
+                </Card>
+              </CardActionArea>
             </Grid>
           ))}
         </Grid>

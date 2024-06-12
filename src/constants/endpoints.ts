@@ -18,12 +18,26 @@ export function makeGetWalletListEndpoint() {
     return "wallets" as const;
 }
 
+export function makeGetWalletDetailsEndpoint(walletId: string) {
+    return `wallets/${walletId}` as const;
+}
+
 export function makeGetCurrencyListEndpoint() {
     return "currencies" as const;
 }
 
+
+export function makeGetCurrencyDenominationListEndpoint(currency: string) {
+    return `currencies/${currency}/denominations` as const;
+}
+
+
 export function makeCreateWalletEndpoint() {
     return "wallets" as const;
+}
+
+export function makeAddWalletDenominationEndpoint(walletId: string) {
+    return `wallets/${walletId}/denominations` as const;
 }
 
 export function makeGetUserProfileEndpoint() {
