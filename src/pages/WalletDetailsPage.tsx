@@ -5,17 +5,20 @@ import { useGetWalletDetailsQuery } from "@/hooks/wallet";
 import FullPageSpinner from "@/components/ui/FullPageSpinner";
 import WalletDenominationList from "@/components/WalletDenominationList";
 import {
-  Card,
-  CardContent,
+  Button,
   Fab,
   Grid,
   Tooltip,
   Typography,
+  CardContent,
 } from "@mui/material";
+import AddWalletBalanceModal from "@/components/AddWalletBalanceModal";
 import AddWalletDenominationModal from "@/components/AddWalletDenominationModal";
 
 function WalletDetailsPage() {
-  const [open, setOpen] = React.useState(false);
+  const [openAddDenominationModal, setOpenAddDenominationModal] =
+    React.useState(false);
+  const [openAddBalanceModal, setOpenAddBalanceModal] = React.useState(false);
   const { walletId } = useParams<{ walletId: string }>();
   const { data: walletDetails, isPending } = useGetWalletDetailsQuery({
     variables: {
@@ -27,13 +30,22 @@ function WalletDetailsPage() {
     return <FullPageSpinner />;
   }
 
-  function handleOpenModal() {
-    setOpen(true);
+  function handleOpenAddDenominationModal() {
+    setOpenAddDenominationModal(true);
   }
 
-  function handleCloseModal() {
-    setOpen(false);
+  function handleCloseAddDenominationModal() {
+    setOpenAddDenominationModal(false);
   }
+
+  function handleOpenAddBalanceModal() {
+    setOpenAddBalanceModal(true);
+  }
+
+  function handleCloseAddBalanceModal() {
+    setOpenAddBalanceModal(false);
+  }
+
   return (
     <div className="mt-2 h-full">
       <Typography variant="h5" align="center" className="my-10">
@@ -41,18 +53,31 @@ function WalletDetailsPage() {
       </Typography>
 
       <Grid container>
+        {!!walletDetails &&
+          walletDetails.data.denominations &&
+          walletDetails.data.denominations.length > 0 && (
+            <Grid item xs={12}>
+              <div className="flex">
+                <div className="flex-1" />
+                <Button
+                  variant={"contained"}
+                  disableElevation
+                  onClick={handleOpenAddBalanceModal}
+                >
+                  Add Balance
+                </Button>
+              </div>
+            </Grid>
+          )}
+
         <Grid item xs={12} lg={4}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography>Currency: {walletDetails?.data?.currency}</Typography>
-              <Typography>Balance: {walletDetails?.data?.balance}</Typography>
-            </CardContent>
-          </Card>
+          <CardContent>
+            <Typography>Currency: {walletDetails?.data?.currency}</Typography>
+            <Typography>Balance: {walletDetails?.data?.balance}</Typography>
+          </CardContent>
         </Grid>
 
         <Grid item xs={12} className="mt-3">
-          <Typography className="mb-3">Denominations:</Typography>
-
           <WalletDenominationList
             items={walletDetails?.data?.denominations ?? []}
           />
@@ -61,16 +86,28 @@ function WalletDetailsPage() {
 
       {!!walletDetails && (
         <AddWalletDenominationModal
-          open={open}
-          onClose={handleCloseModal}
+          open={openAddDenominationModal}
           walletId={walletDetails.data.id}
           currency={walletDetails.data.currency}
+          onClose={handleCloseAddDenominationModal}
+        />
+      )}
+
+      {!!walletDetails && (
+        <AddWalletBalanceModal
+          open={openAddBalanceModal}
+          wallet={walletDetails.data}
+          onClose={handleCloseAddBalanceModal}
         />
       )}
 
       <div className="absolute right-16 bottom-16">
         <Tooltip title="Add Denomination">
-          <Fab color="primary" aria-label="add" onClick={handleOpenModal}>
+          <Fab
+            color="primary"
+            aria-label="add"
+            onClick={handleOpenAddDenominationModal}
+          >
             <Add />
           </Fab>
         </Tooltip>

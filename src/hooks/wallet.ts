@@ -2,11 +2,11 @@ import { AxiosResponse } from "axios";
 import { apiClientV1 } from "@/utils/http";
 import { QueryKeys } from "@/constants/keys";
 import { createMutation, createQuery } from "react-query-kit";
-import { makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint } from "@/constants/endpoints";
-import { AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, WalletDetailsResponseResource, WalletListResponseResource } from "@/types/api-response";
+import { makeAddMoneyTransactionEndpoint, makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint } from "@/constants/endpoints";
+import { AddMoneyTransactionRequestData, AddMoneyTransactionResponseResource, AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, WalletDetailsResponseResource, WalletListResponseResource } from "@/types/api-response";
 
 export const useGetWalletListQuery = createQuery<WalletListResponseResource>({
-    queryKey: [QueryKeys.WALLET_LIST],
+    queryKey: [QueryKeys.WALLET, "list"],
     fetcher: async () => {
         const response = await apiClientV1.get<WalletListResponseResource>(makeGetWalletListEndpoint());
         return response.data;
@@ -14,7 +14,7 @@ export const useGetWalletListQuery = createQuery<WalletListResponseResource>({
 })
 
 export const useGetWalletDetailsQuery = createQuery<WalletDetailsResponseResource, { walletId: string }>({
-    queryKey: [QueryKeys.WALLET_DETAILS],
+    queryKey: [QueryKeys.WALLET],
     fetcher: async ({ walletId }) => {
         const response = await apiClientV1.get<WalletDetailsResponseResource>(makeGetWalletDetailsEndpoint(walletId));
         return response.data;
@@ -49,6 +49,15 @@ export const useAddWalletDenominationMutation = createMutation<AddWalletDenomina
     mutationFn: async (variables) => {
         const response = await apiClientV1
             .post<AddWalletDenominationResponseResource, AxiosResponse<AddWalletDenominationResponseResource>, AddWalletDenominationRequestData>(makeAddWalletDenominationEndpoint(variables.walletId), variables);
+
+        return response.data;
+    }
+})
+
+export const useAddWalletBalaneMutation = createMutation<AddMoneyTransactionResponseResource, AddMoneyTransactionRequestData & { walletId: string }>({
+    mutationFn: async (variables) => {
+        const response = await apiClientV1
+            .post<AddMoneyTransactionResponseResource, AxiosResponse<AddMoneyTransactionResponseResource>, AddMoneyTransactionRequestData>(makeAddMoneyTransactionEndpoint(variables.walletId), variables);
 
         return response.data;
     }

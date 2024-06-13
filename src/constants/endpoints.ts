@@ -40,6 +40,10 @@ export function makeAddWalletDenominationEndpoint(walletId: string) {
     return `wallets/${walletId}/denominations` as const;
 }
 
+export function makeAddMoneyTransactionEndpoint(walletId: string) {
+    return `transactions/${walletId}/deposit` as const;
+}
+
 export function makeGetUserProfileEndpoint() {
     return "user" as const;
 }
