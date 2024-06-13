@@ -11,6 +11,7 @@ import {
   useGetWalletListQuery,
   useGetWalletDetailsQuery,
   useWithdrawWalletBalaneMutation,
+  useGetTransactionListQuery,
 } from "@/hooks/wallet";
 import {
   Dialog,
@@ -100,6 +101,10 @@ function WithdrawWalletBalanceModal(props: Props) {
 
           queryClient.invalidateQueries({
             queryKey: useGetWalletListQuery.getKey(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: useGetTransactionListQuery.getKey(),
           });
 
           enqueueSnackbar({

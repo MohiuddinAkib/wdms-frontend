@@ -8,6 +8,7 @@ import { Route, Routes } from "react-router-dom";
 import AuthLayout from "@components/layout/AuthLayout";
 import WalletDetailsPage from "@/pages/WalletDetailsPage";
 import DrawerLayout from "@/components/layout/DrawerLayout";
+import TransactionListPage from "./pages/TransactionListPage";
 
 // denomination add kra
 // money add kra
@@ -25,6 +26,7 @@ function App() {
         }
       >
         <Route path="/" element={<HomePage />} />
+        <Route path="/transactions" element={<TransactionListPage />} />
         <Route path="/wallets/:walletId" element={<WalletDetailsPage />} />
       </Route>
 

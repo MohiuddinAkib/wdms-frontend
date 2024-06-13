@@ -9,6 +9,7 @@ import {
 import LoadableButton from "@components/ui/LoadableButton";
 import {
   useAddWalletBalaneMutation,
+  useGetTransactionListQuery,
   useGetWalletDetailsQuery,
   useGetWalletListQuery,
 } from "@/hooks/wallet";
@@ -100,6 +101,10 @@ function AddWalletBalanceModal(props: Props) {
 
           queryClient.invalidateQueries({
             queryKey: useGetWalletListQuery.getKey(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: useGetTransactionListQuery.getKey(),
           });
 
           enqueueSnackbar({

@@ -51,3 +51,7 @@ export function makeWithdrawMoneyTransactionEndpoint(walletId: string) {
 export function makeGetUserProfileEndpoint() {
     return "user" as const;
 }
+
+export function makeGetTransactionListEndpoint() {
+    return "transactions" as const;
+}

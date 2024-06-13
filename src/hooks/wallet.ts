@@ -2,8 +2,8 @@ import { AxiosResponse } from "axios";
 import { apiClientV1 } from "@/utils/http";
 import { QueryKeys } from "@/constants/keys";
 import { createMutation, createQuery } from "react-query-kit";
-import { makeAddMoneyTransactionEndpoint, makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint, makeWithdrawMoneyTransactionEndpoint } from "@/constants/endpoints";
-import { AddMoneyTransactionRequestData, AddMoneyTransactionResponseResource, AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, WalletDetailsResponseResource, WalletListResponseResource, WithdrawMoneyTransactionRequestData, WithdrawMoneyTransactionResponseResource } from "@/types/api-response";
+import { makeAddMoneyTransactionEndpoint, makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetTransactionListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint, makeWithdrawMoneyTransactionEndpoint } from "@/constants/endpoints";
+import { AddMoneyTransactionRequestData, AddMoneyTransactionResponseResource, AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, PaginatedData, TransactionListQueryParams, TransactionResource, WalletDetailsResponseResource, WalletListResponseResource, WithdrawMoneyTransactionRequestData, WithdrawMoneyTransactionResponseResource } from "@/types/api-response";
 
 export const useGetWalletListQuery = createQuery<WalletListResponseResource>({
     queryKey: [QueryKeys.WALLET, "list"],
@@ -67,6 +67,18 @@ export const useWithdrawWalletBalaneMutation = createMutation<WithdrawMoneyTrans
     mutationFn: async (variables) => {
         const response = await apiClientV1
             .post<WithdrawMoneyTransactionResponseResource, AxiosResponse<WithdrawMoneyTransactionResponseResource>, WithdrawMoneyTransactionRequestData>(makeWithdrawMoneyTransactionEndpoint(variables.walletId), variables);
+
+        return response.data;
+    }
+})
+
+export const useGetTransactionListQuery = createQuery<PaginatedData<TransactionResource>, TransactionListQueryParams>({
+    queryKey: [QueryKeys.TRANSACTION, "list"],
+    async fetcher(variables) {
+        const response = await apiClientV1
+            .get<PaginatedData<TransactionResource>, AxiosResponse<PaginatedData<TransactionResource>>, TransactionListQueryParams>(makeGetTransactionListEndpoint(), {
+                params: variables
+            });
 
         return response.data;
     }

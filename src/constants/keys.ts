@@ -3,8 +3,9 @@ export const StorageKeys = {
 } as const;
 
 export const QueryKeys = {
-    AUTH_DATA: "auth-data",
     WALLET: "wallet",
+    AUTH_DATA: "auth-data",
+    TRANSACTION: "transaction",
     CURRENCY_LIST: "currency-list",
     DENOMINATION_LIST: "denomination-list",
     USER_PROFILE_DATA: "user-profile-data"

@@ -31,6 +31,7 @@ import {
   // useMediaQuery,
   // useTheme,
 } from "@mui/material";
+import AppLink from "../ui/AppLink";
 
 // const DRAWER_WIDTH = 240;
 
@@ -152,6 +153,32 @@ function DrawerLayout() {
                           "truncate text-base text-[#797979] font-medium",
                       }}
                     />
+                  </MenuItem>
+
+                  <MenuItem
+                    divider
+                    component={AppLink}
+                    onClick={() => {
+                      popupState.close();
+                    }}
+                    className={"py-4"}
+                    to={"/"}
+                    disabled={isAuthDataLoading}
+                  >
+                    <ListItemText>Wallets</ListItemText>
+                  </MenuItem>
+
+                  <MenuItem
+                    divider
+                    component={AppLink}
+                    onClick={() => {
+                      popupState.close();
+                    }}
+                    className={"py-4"}
+                    to={"/transactions"}
+                    disabled={isAuthDataLoading}
+                  >
+                    <ListItemText>Transactions</ListItemText>
                   </MenuItem>
 
                   <MenuItem

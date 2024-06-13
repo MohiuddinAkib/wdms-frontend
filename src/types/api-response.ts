@@ -133,6 +133,7 @@ export type TransactionResource = {
     type: string;
     quantity: number;
     happened_at: string;
+    group_id: string;
 };
 
 export type WalletDenominationResource = {
@@ -171,3 +172,34 @@ export type GetDenominationsResponse = {
     success: boolean;
     data: DenominationResource[]
 }
+export type Link = {
+    url?: string
+    label: string
+    active: boolean
+}
+
+export type PaginatedData<D extends object> = {
+    data: D[];
+    current_page: number
+    first_page_url: string
+    from: number
+    last_page: number
+    last_page_url: string
+    links: Link[]
+    next_page_url?: string
+    path: string
+    per_page: number
+    prev_page_url?: string
+    to: number
+    total: number
+}
+
+export type TransactionListQueryParams = PaginationQueryParams<Partial<{
+    walletId: string;
+    happened_at_between: `${string},${string}`
+}>>
+
+export type PaginationQueryParams<D extends object> = {
+    page?: number;
+    limit?: number;
+} & D
