@@ -65,7 +65,7 @@ function HomePage() {
 
       <WalletCreateModal open={open} onClose={handleCloseModal} />
 
-      <div className="absolute right-16 bottom-16">
+      <div className="fixed right-16 bottom-16">
         <Tooltip title="Create new wallet">
           <Fab color="primary" aria-label="add" onClick={handleOpenModal}>
             <Add />

@@ -14,9 +14,12 @@ import {
 } from "@mui/material";
 import AddWalletBalanceModal from "@/components/AddWalletBalanceModal";
 import AddWalletDenominationModal from "@/components/AddWalletDenominationModal";
+import WithdrawWalletBalanceModal from "@/components/WithdrawWalletBalanceModal";
 
 function WalletDetailsPage() {
   const [openAddDenominationModal, setOpenAddDenominationModal] =
+    React.useState(false);
+  const [openWithdrawBalanceModal, setOpenWithdrawBalanceModal] =
     React.useState(false);
   const [openAddBalanceModal, setOpenAddBalanceModal] = React.useState(false);
   const { walletId } = useParams<{ walletId: string }>();
@@ -46,6 +49,14 @@ function WalletDetailsPage() {
     setOpenAddBalanceModal(false);
   }
 
+  function handleOpenWithdrawBalanceModal() {
+    setOpenWithdrawBalanceModal(true);
+  }
+
+  function handleCloseWithdrawBalanceModal() {
+    setOpenWithdrawBalanceModal(false);
+  }
+
   return (
     <div className="mt-2 h-full">
       <Typography variant="h5" align="center" className="my-10">
@@ -57,8 +68,16 @@ function WalletDetailsPage() {
           walletDetails.data.denominations &&
           walletDetails.data.denominations.length > 0 && (
             <Grid item xs={12}>
-              <div className="flex">
+              <div className="flex gap-x-2">
                 <div className="flex-1" />
+                <Button
+                  disableElevation
+                  variant={"outlined"}
+                  onClick={handleOpenWithdrawBalanceModal}
+                >
+                  Withdraw Balance
+                </Button>
+
                 <Button
                   variant={"contained"}
                   disableElevation
@@ -101,7 +120,15 @@ function WalletDetailsPage() {
         />
       )}
 
-      <div className="absolute right-16 bottom-16">
+      {!!walletDetails && (
+        <WithdrawWalletBalanceModal
+          wallet={walletDetails.data}
+          open={openWithdrawBalanceModal}
+          onClose={handleCloseWithdrawBalanceModal}
+        />
+      )}
+
+      <div className="fixed right-16 bottom-16">
         <Tooltip title="Add Denomination">
           <Fab
             color="primary"

@@ -2,8 +2,8 @@ import { AxiosResponse } from "axios";
 import { apiClientV1 } from "@/utils/http";
 import { QueryKeys } from "@/constants/keys";
 import { createMutation, createQuery } from "react-query-kit";
-import { makeAddMoneyTransactionEndpoint, makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint } from "@/constants/endpoints";
-import { AddMoneyTransactionRequestData, AddMoneyTransactionResponseResource, AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, WalletDetailsResponseResource, WalletListResponseResource } from "@/types/api-response";
+import { makeAddMoneyTransactionEndpoint, makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint, makeWithdrawMoneyTransactionEndpoint } from "@/constants/endpoints";
+import { AddMoneyTransactionRequestData, AddMoneyTransactionResponseResource, AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, WalletDetailsResponseResource, WalletListResponseResource, WithdrawMoneyTransactionRequestData, WithdrawMoneyTransactionResponseResource } from "@/types/api-response";
 
 export const useGetWalletListQuery = createQuery<WalletListResponseResource>({
     queryKey: [QueryKeys.WALLET, "list"],
@@ -58,6 +58,15 @@ export const useAddWalletBalaneMutation = createMutation<AddMoneyTransactionResp
     mutationFn: async (variables) => {
         const response = await apiClientV1
             .post<AddMoneyTransactionResponseResource, AxiosResponse<AddMoneyTransactionResponseResource>, AddMoneyTransactionRequestData>(makeAddMoneyTransactionEndpoint(variables.walletId), variables);
+
+        return response.data;
+    }
+})
+
+export const useWithdrawWalletBalaneMutation = createMutation<WithdrawMoneyTransactionResponseResource, WithdrawMoneyTransactionRequestData & { walletId: string }>({
+    mutationFn: async (variables) => {
+        const response = await apiClientV1
+            .post<WithdrawMoneyTransactionResponseResource, AxiosResponse<WithdrawMoneyTransactionResponseResource>, WithdrawMoneyTransactionRequestData>(makeWithdrawMoneyTransactionEndpoint(variables.walletId), variables);
 
         return response.data;
     }

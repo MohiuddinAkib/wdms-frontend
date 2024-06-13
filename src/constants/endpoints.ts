@@ -44,6 +44,10 @@ export function makeAddMoneyTransactionEndpoint(walletId: string) {
     return `transactions/${walletId}/deposit` as const;
 }
 
+export function makeWithdrawMoneyTransactionEndpoint(walletId: string) {
+    return `transactions/${walletId}/withdraw` as const;
+}
+
 export function makeGetUserProfileEndpoint() {
     return "user" as const;
 }

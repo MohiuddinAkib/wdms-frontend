@@ -27,14 +27,19 @@ function WalletDenominationList({ items }: Props) {
   return (
     <Grid container spacing={2}>
       {Object.entries(groupedItems).map(([type, denominations]) => (
-        <Grid item xs={12} md={6} lg={3}>
-          <Grid container spacing={2} key={type} flexDirection={"column"}>
+        <Grid item xs={12} md={6}>
+          <Grid
+            container
+            spacing={2}
+            key={type}
+            className="border-r border-red-500"
+          >
             <Grid item xs={12}>
               <Typography textTransform={"uppercase"}>{type}s:</Typography>
             </Grid>
 
             {denominations.map((eachDenomination) => (
-              <Grid item xs={12} key={eachDenomination.id}>
+              <Grid item xs={12} lg={4} key={eachDenomination.id}>
                 <Card variant={"outlined"}>
                   <CardContent className="flex flex-col gap-y-2">
                     <Typography>name: {eachDenomination.name}</Typography>

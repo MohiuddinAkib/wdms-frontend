@@ -8,9 +8,9 @@ import {
 } from "@/types/api-response";
 import LoadableButton from "@components/ui/LoadableButton";
 import {
-  useAddWalletBalaneMutation,
-  useGetWalletDetailsQuery,
   useGetWalletListQuery,
+  useGetWalletDetailsQuery,
+  useWithdrawWalletBalaneMutation,
 } from "@/hooks/wallet";
 import {
   Dialog,
@@ -34,7 +34,7 @@ type Props = {
   wallet: WalletResource;
 };
 
-function AddWalletBalanceModal(props: Props) {
+function WithdrawWalletBalanceModal(props: Props) {
   const theme = useTheme();
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
@@ -43,8 +43,8 @@ function AddWalletBalanceModal(props: Props) {
     Record<string, WalletDenominationResource>
   >({});
 
-  const { mutate: addMoneyTransaction, isPending: isAddingBalance } =
-    useAddWalletBalaneMutation();
+  const { mutate: withdrawMoneyTransaction, isPending: isWithdrawing } =
+    useWithdrawWalletBalaneMutation();
 
   function handleToggleDenom(denom: WalletDenominationResource) {
     setDenomQuantity((prevState) => {
@@ -66,7 +66,7 @@ function AddWalletBalanceModal(props: Props) {
   function handleMoneyAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    addMoneyTransaction(
+    withdrawMoneyTransaction(
       {
         walletId: props.wallet.id,
         uuid: props.wallet.id,
@@ -177,24 +177,27 @@ function AddWalletBalanceModal(props: Props) {
         }),
       }}
     >
-      <DialogTitle>Add Balance</DialogTitle>
+      <DialogTitle>Withdraw Balance</DialogTitle>
       <form onSubmit={handleMoneyAdd}>
         <DialogContent>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <div className="flex flex-col gap-y-3">
                 <List className="h-96">
-                  {props.wallet.denominations?.map((eachDenom) => (
-                    <React.Fragment key={eachDenom.id}>
-                      <ListItemButton
-                        divider
-                        selected={eachDenom.id in denomQuantity}
-                        onClick={handleToggleDenom.bind(null, eachDenom)}
-                      >
-                        {eachDenom.name} - {eachDenom.type}
-                      </ListItemButton>
-                    </React.Fragment>
-                  ))}
+                  {props.wallet.denominations
+                    ?.filter((eachDenom) => eachDenom.quantity > 0)
+                    ?.map((eachDenom) => (
+                      <React.Fragment key={eachDenom.id}>
+                        <ListItemButton
+                          divider
+                          selected={eachDenom.id in denomQuantity}
+                          onClick={handleToggleDenom.bind(null, eachDenom)}
+                        >
+                          {eachDenom.name} - {eachDenom.type} - Quantity:{" "}
+                          {eachDenom.quantity}
+                        </ListItemButton>
+                      </React.Fragment>
+                    ))}
                 </List>
               </div>
             </Grid>
@@ -205,7 +208,7 @@ function AddWalletBalanceModal(props: Props) {
                   denomQuantityInputs
                 ) : (
                   <Typography align="center">
-                    Select a denominations to add balance
+                    Select denominations to withdraw balance
                   </Typography>
                 )}
               </div>
@@ -218,7 +221,7 @@ function AddWalletBalanceModal(props: Props) {
             type={"submit"}
             disableElevation
             variant="contained"
-            loading={isAddingBalance}
+            loading={isWithdrawing}
           >
             Submit
           </LoadableButton>
@@ -228,4 +231,4 @@ function AddWalletBalanceModal(props: Props) {
   );
 }
 
-export default AddWalletBalanceModal;
+export default WithdrawWalletBalanceModal;
