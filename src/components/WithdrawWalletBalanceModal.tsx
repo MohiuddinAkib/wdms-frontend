@@ -44,7 +44,7 @@ function WithdrawWalletBalanceModal(props: Props) {
     Record<string, WalletDenominationResource>
   >({});
 
-  const { mutate: withdrawMoneyTransaction, isPending: isWithdrawing } =
+  const { mutate: withdrawMoneyTransaction, isPending: isWithdrawing, isError, error, reset } =
     useWithdrawWalletBalaneMutation();
 
   function handleToggleDenom(denom: WalletDenominationResource) {
@@ -113,6 +113,8 @@ function WithdrawWalletBalanceModal(props: Props) {
           });
 
           props.onClose?.();
+
+          setDenomQuantity({})
         },
       }
     );
@@ -143,8 +145,14 @@ function WithdrawWalletBalanceModal(props: Props) {
     });
   }
 
+  function handleOnClose() {
+    reset();
+    props.onClose?.();
+    setDenomQuantity({})
+  }
+
   const denomQuantityInputs = Object.entries(denomQuantity).map(
-    ([denomId, denom]) => (
+    ([denomId, denom], index) => (
       <div key={denomId} className="flex gap-x-2">
         <TextField
           fullWidth
@@ -156,6 +164,8 @@ function WithdrawWalletBalanceModal(props: Props) {
             min: 0,
           }}
           onChange={handleChangeDenomQuantity.bind(null, denom)}
+          error={isError}
+          helperText={error?.field_errors?.[`denominations.${index}.quantity`]}
         />
 
         <div>
@@ -175,7 +185,7 @@ function WithdrawWalletBalanceModal(props: Props) {
       maxWidth={"xl"}
       open={props.open}
       fullWidth={fullWidth}
-      onClose={props.onClose}
+      onClose={handleOnClose}
       classes={{
         paper: clsx({
           "min-w-[900px]": !fullWidth,

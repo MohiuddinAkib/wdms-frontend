@@ -44,7 +44,7 @@ function AddWalletBalanceModal(props: Props) {
     Record<string, WalletDenominationResource>
   >({});
 
-  const { mutate: addMoneyTransaction, isPending: isAddingBalance } =
+  const { mutate: addMoneyTransaction, isPending: isAddingBalance, error, isError, reset } =
     useAddWalletBalaneMutation();
 
   function handleToggleDenom(denom: WalletDenominationResource) {
@@ -113,6 +113,7 @@ function AddWalletBalanceModal(props: Props) {
           });
 
           props.onClose?.();
+          setDenomQuantity({})
         },
       }
     );
@@ -144,7 +145,7 @@ function AddWalletBalanceModal(props: Props) {
   }
 
   const denomQuantityInputs = Object.entries(denomQuantity).map(
-    ([denomId, denom]) => (
+    ([denomId, denom], index) => (
       <div key={denomId} className="flex gap-x-2">
         <TextField
           fullWidth
@@ -156,6 +157,8 @@ function AddWalletBalanceModal(props: Props) {
             min: 0,
           }}
           onChange={handleChangeDenomQuantity.bind(null, denom)}
+          error={isError}
+          helperText={error?.field_errors?.[`denominations.${index}.quantity`]?.[0]}
         />
 
         <div>
@@ -170,12 +173,18 @@ function AddWalletBalanceModal(props: Props) {
     )
   );
 
+  function handleOnClose() {
+    reset();
+    props.onClose?.();
+    setDenomQuantity({})
+  }
+
   return (
     <Dialog
       maxWidth={"xl"}
       open={props.open}
       fullWidth={fullWidth}
-      onClose={props.onClose}
+      onClose={handleOnClose}
       classes={{
         paper: clsx({
           "min-w-[900px]": !fullWidth,
