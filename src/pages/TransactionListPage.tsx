@@ -54,7 +54,7 @@ function TransactionListPage() {
       <div key={grpId} className="flex-col px-5 mb-5">
         <ListItemText
           secondary={`Currency: ${eachTran[0].wallet_currency}`}
-          primary={dayjs(happenedAt).format("YYYY-MM-DD HH:mm:ss A")}
+          primary={dayjs(happenedAt).format("YYYY-MM-DD hh:mm:ss A")}
           primaryTypographyProps={{
             variant: "h6",
           }}
