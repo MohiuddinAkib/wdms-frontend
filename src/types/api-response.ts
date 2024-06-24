@@ -133,7 +133,7 @@ export type TransactionResource = {
     denomination_id: string;
     denomination_name: string;
     denomination_type: string;
-    denomination_quantity: number;
+    quantity: number;
     denomination_value: number;
     type: string;
     happened_at: string;
