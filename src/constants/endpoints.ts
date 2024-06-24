@@ -36,8 +36,16 @@ export function makeCreateWalletEndpoint() {
     return "wallets" as const;
 }
 
+export function makeDeleteWalletEndpoint(walletId: string) {
+    return `wallets/${walletId}` as const;
+}
+
 export function makeAddWalletDenominationEndpoint(walletId: string) {
     return `wallets/${walletId}/denominations` as const;
+}
+
+export function makeDeleteWalletDenominationEndpoint(walletId: string, denominationId: string) {
+    return `wallets/${walletId}/denominations/${denominationId}` as const;
 }
 
 export function makeAddMoneyTransactionEndpoint(walletId: string) {

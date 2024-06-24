@@ -4,6 +4,7 @@ import { skipToken } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import LoadableButton from "@components/ui/LoadableButton";
+import { WalletDenominationResource } from "@/types/api-response";
 import {
   useAddWalletDenominationMutation,
   useGetCurrencyDenominationsQuery,
@@ -25,6 +26,7 @@ type Props = {
   currency: string;
   onClose?: () => void;
   walletId: string;
+  walletDenominations: WalletDenominationResource[]
 };
 
 function AddWalletDenominationModal(props: Props) {
@@ -42,6 +44,8 @@ function AddWalletDenominationModal(props: Props) {
         }
       : skipToken,
   });
+
+  const walletDenominations = new Set(props.walletDenominations.map(eachWalletDenom => `${eachWalletDenom.name}-${eachWalletDenom.type}`))
 
   const { mutate: addWalletDenomination, isPending: isAddingDenom } =
     useAddWalletDenominationMutation();
@@ -161,7 +165,7 @@ function AddWalletDenominationModal(props: Props) {
                   error={invalid}
                   helperText={error?.message}
                 >
-                  {currencyDenominations?.data?.map((eachCurrDenom, i) => (
+                  {currencyDenominations?.data?.map((eachCurrDenom, i) => walletDenominations.has(`${eachCurrDenom.name}-${eachCurrDenom.type}`) ? null : (
                     <MenuItem
                       key={i}
                       value={`${eachCurrDenom.name}||${eachCurrDenom.type}`}

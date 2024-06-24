@@ -128,10 +128,14 @@ export type DeleteWalletResponseResource = {
 
 export type TransactionResource = {
     id: string;
-    wallet: WalletResource;
-    denomination: WalletDenominationResource;
+    wallet_id: string;
+    wallet_currency: string;
+    denomination_id: string;
+    denomination_name: string;
+    denomination_type: string;
+    denomination_quantity: number;
+    denomination_value: number;
     type: string;
-    quantity: number;
     happened_at: string;
     group_id: string;
 };

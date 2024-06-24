@@ -1,28 +1,39 @@
 import React from "react";
+import { useSnackbar } from "notistack";
 import { Add } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
-import { useGetWalletDetailsQuery } from "@/hooks/wallet";
+import { useQueryClient } from "@tanstack/react-query";
 import FullPageSpinner from "@/components/ui/FullPageSpinner";
+import AddWalletBalanceModal from "@/components/AddWalletBalanceModal";
 import WalletDenominationList from "@/components/WalletDenominationList";
+import AddWalletDenominationModal from "@/components/AddWalletDenominationModal";
+import WithdrawWalletBalanceModal from "@/components/WithdrawWalletBalanceModal";
 import {
-  Button,
+  useGetWalletDetailsQuery,
+  useRemoveWalletDenominationMutation,
+} from "@/hooks/wallet";
+import {
   Fab,
   Grid,
+  Button,
   Tooltip,
   Typography,
   CardContent,
 } from "@mui/material";
-import AddWalletBalanceModal from "@/components/AddWalletBalanceModal";
-import AddWalletDenominationModal from "@/components/AddWalletDenominationModal";
-import WithdrawWalletBalanceModal from "@/components/WithdrawWalletBalanceModal";
 
 function WalletDetailsPage() {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
   const [openAddDenominationModal, setOpenAddDenominationModal] =
     React.useState(false);
   const [openWithdrawBalanceModal, setOpenWithdrawBalanceModal] =
     React.useState(false);
   const [openAddBalanceModal, setOpenAddBalanceModal] = React.useState(false);
   const { walletId } = useParams<{ walletId: string }>();
+
+  const { mutate: removeWalletDenomination, isPending: isRemoving } =
+    useRemoveWalletDenominationMutation();
+
   const { data: walletDetails, isPending } = useGetWalletDetailsQuery({
     variables: {
       walletId: walletId!,
@@ -55,6 +66,46 @@ function WalletDetailsPage() {
 
   function handleCloseWithdrawBalanceModal() {
     setOpenWithdrawBalanceModal(false);
+  }
+
+  function handleRemoveWalletDenomination(denominationId: string) {
+    removeWalletDenomination(
+      {
+        walletId: walletId!,
+        denominationId,
+      },
+      {
+        onError(error) {
+          const firstErrorMsg = Object.values(error.field_errors)[0];
+
+          if (firstErrorMsg) {
+            enqueueSnackbar({
+              message: firstErrorMsg,
+              variant: "error",
+            });
+          }
+
+          enqueueSnackbar({
+            message: error.non_field_error,
+            variant: "error",
+          });
+        },
+        onSuccess(data) {
+          if(data.success) {
+            queryClient.invalidateQueries({
+              queryKey: useGetWalletDetailsQuery.getKey({
+                walletId: walletId!,
+              }),
+            });
+          }
+
+          enqueueSnackbar({
+            message: data.message,
+            variant: data.success ? "success" : "error",
+          });
+        },
+      }
+    );
   }
 
   return (
@@ -98,7 +149,9 @@ function WalletDetailsPage() {
 
         <Grid item xs={12} className="mt-3">
           <WalletDenominationList
+            isRemoving={isRemoving}
             items={walletDetails?.data?.denominations ?? []}
+            onDenominationRemove={handleRemoveWalletDenomination}
           />
         </Grid>
       </Grid>
@@ -109,6 +162,7 @@ function WalletDetailsPage() {
           walletId={walletDetails.data.id}
           currency={walletDetails.data.currency}
           onClose={handleCloseAddDenominationModal}
+          walletDenominations={walletDetails.data.denominations ?? []}
         />
       )}
 

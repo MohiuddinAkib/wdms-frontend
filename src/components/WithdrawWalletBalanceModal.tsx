@@ -41,11 +41,16 @@ function WithdrawWalletBalanceModal(props: Props) {
   const { enqueueSnackbar } = useSnackbar();
   const fullWidth = useMediaQuery(theme.breakpoints.down("md"));
   const [denomQuantity, setDenomQuantity] = React.useState<
-    Record<string, WalletDenominationResource>
+    Record<string, WalletDenominationResource & { inputQuantity: number }>
   >({});
 
-  const { mutate: withdrawMoneyTransaction, isPending: isWithdrawing, isError, error, reset } =
-    useWithdrawWalletBalaneMutation();
+  const {
+    mutate: withdrawMoneyTransaction,
+    isPending: isWithdrawing,
+    isError,
+    error,
+    reset,
+  } = useWithdrawWalletBalaneMutation();
 
   function handleToggleDenom(denom: WalletDenominationResource) {
     setDenomQuantity((prevState) => {
@@ -56,7 +61,7 @@ function WithdrawWalletBalanceModal(props: Props) {
       } else {
         copied[denom.id] = {
           ...denom,
-          quantity: 0,
+          inputQuantity: 0,
         };
       }
 
@@ -93,19 +98,21 @@ function WithdrawWalletBalanceModal(props: Props) {
           });
         },
         onSuccess(data) {
-          queryClient.invalidateQueries({
-            queryKey: useGetWalletDetailsQuery.getKey({
-              walletId: props.wallet.id,
-            }),
-          });
+          if (data.success) {
+            queryClient.invalidateQueries({
+              queryKey: useGetWalletDetailsQuery.getKey({
+                walletId: props.wallet.id,
+              }),
+            });
 
-          queryClient.invalidateQueries({
-            queryKey: useGetWalletListQuery.getKey(),
-          });
+            queryClient.invalidateQueries({
+              queryKey: useGetWalletListQuery.getKey(),
+            });
 
-          queryClient.invalidateQueries({
-            queryKey: useGetTransactionListQuery.getKey(),
-          });
+            queryClient.invalidateQueries({
+              queryKey: useGetTransactionListQuery.getKey(),
+            });
+          }
 
           enqueueSnackbar({
             message: data.message,
@@ -114,7 +121,7 @@ function WithdrawWalletBalanceModal(props: Props) {
 
           props.onClose?.();
 
-          setDenomQuantity({})
+          setDenomQuantity({});
         },
       }
     );
@@ -132,12 +139,12 @@ function WithdrawWalletBalanceModal(props: Props) {
       if (denom.id in copied) {
         copied[denom.id] = {
           ...denom,
-          quantity,
+          inputQuantity: quantity,
         };
       } else {
         copied[denom.id] = {
           ...copied[denom.id],
-          quantity,
+          inputQuantity: quantity,
         };
       }
 
@@ -148,7 +155,7 @@ function WithdrawWalletBalanceModal(props: Props) {
   function handleOnClose() {
     reset();
     props.onClose?.();
-    setDenomQuantity({})
+    setDenomQuantity({});
   }
 
   const denomQuantityInputs = Object.entries(denomQuantity).map(
@@ -158,13 +165,14 @@ function WithdrawWalletBalanceModal(props: Props) {
           fullWidth
           size={"small"}
           type={"number"}
-          value={denom.quantity}
+          value={denom.inputQuantity}
           label={`${denom.name}-${denom.type}`}
           inputProps={{
             min: 0,
+            max: denom.quantity,
           }}
-          onChange={handleChangeDenomQuantity.bind(null, denom)}
           error={isError}
+          onChange={handleChangeDenomQuantity.bind(null, denom)}
           helperText={error?.field_errors?.[`denominations.${index}.quantity`]}
         />
 

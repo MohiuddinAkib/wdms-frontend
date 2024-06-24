@@ -38,11 +38,11 @@ function TransactionListPage() {
 
   const groupedTrans =
     transactionList?.data?.reduce((acc, curr) => {
-      if (!(curr.id in acc)) {
-        acc[curr.id] = [];
+      if (!(curr.group_id in acc)) {
+        acc[curr.group_id] = [];
       }
 
-      acc[curr.id].push(curr);
+      acc[curr.group_id].push(curr);
 
       return acc;
     }, {} as Record<string, TransactionResource[]>) ?? {};
@@ -60,16 +60,16 @@ function TransactionListPage() {
         />
 
         <List>
-          {eachTran.map((tran) => (
+          {eachTran.map((tran, i) => (
             <ListItem
+              key={i}
               secondaryAction={
-                <Typography>Quantity: {tran.quantity}</Typography>
+                <Typography>Quantity: {tran.denomination_quantity}</Typography>
               }
-              key={tran.id}
               divider
             >
               <ListItemText
-                primary={`${tran.denomination.name} - ${tran.denomination.type}`}
+                primary={`${tran.denomination_name} - ${tran.denomination_type}`}
                 secondary={`Status: ${tran.type}`}
                 secondaryTypographyProps={{
                   className: clsx({

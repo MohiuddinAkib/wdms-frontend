@@ -1,33 +1,33 @@
+import React from "react";
 import clsx from "clsx";
 import { useSnackbar } from "notistack";
 import { Delete } from "@mui/icons-material";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  WalletDenominationResource,
-  WalletResource,
-} from "@/types/api-response";
 import LoadableButton from "@components/ui/LoadableButton";
 import {
-  useAddWalletBalaneMutation,
-  useGetTransactionListQuery,
-  useGetWalletDetailsQuery,
+  WalletResource,
+  WalletDenominationResource,
+} from "@/types/api-response";
+import {
   useGetWalletListQuery,
+  useGetWalletDetailsQuery,
+  useGetTransactionListQuery,
+  useAddWalletBalaneMutation,
 } from "@/hooks/wallet";
 import {
+  Grid,
+  List,
   Dialog,
   useTheme,
   TextField,
+  IconButton,
+  Typography,
   DialogTitle,
   DialogContent,
   DialogActions,
   useMediaQuery,
-  Grid,
-  List,
   ListItemButton,
-  Typography,
-  IconButton,
 } from "@mui/material";
-import React from "react";
 
 type Props = {
   open: boolean;
@@ -44,8 +44,13 @@ function AddWalletBalanceModal(props: Props) {
     Record<string, WalletDenominationResource>
   >({});
 
-  const { mutate: addMoneyTransaction, isPending: isAddingBalance, error, isError, reset } =
-    useAddWalletBalaneMutation();
+  const {
+    mutate: addMoneyTransaction,
+    isPending: isAddingBalance,
+    error,
+    isError,
+    reset,
+  } = useAddWalletBalaneMutation();
 
   function handleToggleDenom(denom: WalletDenominationResource) {
     setDenomQuantity((prevState) => {
@@ -113,7 +118,7 @@ function AddWalletBalanceModal(props: Props) {
           });
 
           props.onClose?.();
-          setDenomQuantity({})
+          setDenomQuantity({});
         },
       }
     );
@@ -158,7 +163,7 @@ function AddWalletBalanceModal(props: Props) {
           }}
           onChange={handleChangeDenomQuantity.bind(null, denom)}
           error={isError}
-          helperText={error?.field_errors?.[`denominations.${index}.quantity`]?.[0]}
+          helperText={error?.field_errors?.[`denominations.${index}.quantity`]}
         />
 
         <div>
@@ -176,7 +181,7 @@ function AddWalletBalanceModal(props: Props) {
   function handleOnClose() {
     reset();
     props.onClose?.();
-    setDenomQuantity({})
+    setDenomQuantity({});
   }
 
   return (

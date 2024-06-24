@@ -2,8 +2,8 @@ import { AxiosResponse } from "axios";
 import { apiClientV1 } from "@/utils/http";
 import { QueryKeys } from "@/constants/keys";
 import { createMutation, createQuery } from "react-query-kit";
-import { makeAddMoneyTransactionEndpoint, makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetTransactionListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint, makeWithdrawMoneyTransactionEndpoint } from "@/constants/endpoints";
-import { AddMoneyTransactionRequestData, AddMoneyTransactionResponseResource, AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, PaginatedData, TransactionListQueryParams, TransactionResource, WalletDetailsResponseResource, WalletListResponseResource, WithdrawMoneyTransactionRequestData, WithdrawMoneyTransactionResponseResource } from "@/types/api-response";
+import { makeAddMoneyTransactionEndpoint, makeAddWalletDenominationEndpoint, makeCreateWalletEndpoint, makeDeleteWalletDenominationEndpoint, makeDeleteWalletEndpoint, makeGetCurrencyDenominationListEndpoint, makeGetCurrencyListEndpoint, makeGetTransactionListEndpoint, makeGetWalletDetailsEndpoint, makeGetWalletListEndpoint, makeWithdrawMoneyTransactionEndpoint } from "@/constants/endpoints";
+import { AddMoneyTransactionRequestData, AddMoneyTransactionResponseResource, AddWalletDenominationRequestData, AddWalletDenominationResponseResource, CreateWalletRequestData, CreateWalletResponseResource, DeleteWalletDenominationResponseResource, DeleteWalletResponseResource, GetCurrenciesResponse, GetDenominationsResponse, PaginatedData, TransactionListQueryParams, TransactionResource, WalletDetailsResponseResource, WalletListResponseResource, WithdrawMoneyTransactionRequestData, WithdrawMoneyTransactionResponseResource } from "@/types/api-response";
 
 export const useGetWalletListQuery = createQuery<WalletListResponseResource>({
     queryKey: [QueryKeys.WALLET, "list"],
@@ -29,6 +29,14 @@ export const useCreateWalletMutation = createMutation<CreateWalletResponseResour
     }
 });
 
+export const useRemoveWalletMutation = createMutation<DeleteWalletResponseResource, {walletId: string}>({
+    mutationFn: async (variables) => {
+        const response = await apiClientV1
+            .delete<DeleteWalletResponseResource, AxiosResponse<DeleteWalletResponseResource>>(makeDeleteWalletEndpoint(variables.walletId));
+        return response.data;
+    }
+});
+
 export const useGetCurrenciesQuery = createQuery<GetCurrenciesResponse>({
     queryKey: [QueryKeys.CURRENCY_LIST],
     async fetcher() {
@@ -49,6 +57,15 @@ export const useAddWalletDenominationMutation = createMutation<AddWalletDenomina
     mutationFn: async (variables) => {
         const response = await apiClientV1
             .post<AddWalletDenominationResponseResource, AxiosResponse<AddWalletDenominationResponseResource>, AddWalletDenominationRequestData>(makeAddWalletDenominationEndpoint(variables.walletId), variables);
+
+        return response.data;
+    }
+})
+
+export const useRemoveWalletDenominationMutation = createMutation<DeleteWalletDenominationResponseResource, { walletId: string; denominationId: string }>({
+    mutationFn: async (variables) => {
+        const response = await apiClientV1
+            .delete<DeleteWalletDenominationResponseResource, AxiosResponse<DeleteWalletDenominationResponseResource>, AddWalletDenominationRequestData>(makeDeleteWalletDenominationEndpoint(variables.walletId, variables.denominationId));
 
         return response.data;
     }

@@ -1,11 +1,18 @@
-import { csrfMutex } from "./mutex";
+import { authMutex, csrfMutex } from "./mutex";
 import localforage from "localforage";
 import { StorageKeys } from "@/constants/keys";
-import { ErrorResponse, } from "@/types/api-response";
-import axios, { AxiosError, HttpStatusCode, InternalAxiosRequestConfig } from "axios";
+import { ErrorResponse } from "@/types/api-response";
+import axios, {
+  AxiosError,
+  HttpStatusCode,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { ApplicationError, StoredAuthData } from "@/types/app-contract";
 
-const API_V1_BASE_URL = new URL("api", import.meta.env.VITE_APP_API_BASE ?? "http://localhost");
+const API_V1_BASE_URL = new URL(
+  "api",
+  import.meta.env.VITE_APP_API_BASE ?? "http://localhost"
+);
 
 export async function getCsrfToken() {
   if (!csrfMutex.isLocked()) {
@@ -19,12 +26,14 @@ export async function getCsrfToken() {
       console.log("/sanctum/csrf-cookie e hit kre csrf token anbo");
 
       await axios.get(
-        `${import.meta.env.VITE_APP_API_BASE ?? "http://localhost"}/sanctum/csrf-cookie`,
+        `${
+          import.meta.env.VITE_APP_API_BASE ?? "http://localhost"
+        }/sanctum/csrf-cookie`,
         {
           withXSRFToken: true,
           withCredentials: true,
         }
-      )
+      );
 
       console.log("/sanctum/csrf-cookie theke csrf token anlam");
     } finally {
@@ -36,14 +45,27 @@ export async function getCsrfToken() {
 
     // wait until the mutex is available without locking it
     await csrfMutex.waitForUnlock();
-    console.log(
-      "lock chilo wait krar pore request ta abar try kre dektesi"
-    );
+    console.log("lock chilo wait krar pore request ta abar try kre dektesi");
+  }
+}
+
+export async function removeAuthToken() {
+  if (!authMutex.isLocked()) {
+    const release = await authMutex.acquire();
+
+    try {
+      await localforage.removeItem(StorageKeys.AUTH_DATA);
+      window.location.reload()
+    } finally {
+      release();
+    }
+  }else {
+    await authMutex.waitForUnlock();
   }
 }
 
 function makeApplicationError(
-  err: AxiosError<ErrorResponse> | Error,
+  err: AxiosError<ErrorResponse> | Error
 ): ApplicationError {
   const isCancelledError = axios.isCancel(err);
 
@@ -57,15 +79,13 @@ function makeApplicationError(
     statusCode = err.response.status;
     non_field_error = err.response.data.message;
 
-
     field_errors = Object.entries(err.response.data.errors ?? {}).reduce(
       (acc, [fieldName, fieldErrors]) => {
         acc[fieldName] = fieldErrors[0];
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     );
-
   } else {
     non_field_error = err.message;
   }
@@ -74,7 +94,7 @@ function makeApplicationError(
     statusCode,
     field_errors,
     non_field_error,
-    isCancelledError
+    isCancelledError,
   };
 }
 
@@ -92,7 +112,7 @@ apiClientV1.interceptors.request.use(
     await csrfMutex.waitForUnlock();
 
     const authData = await localforage.getItem<StoredAuthData>(
-      StorageKeys.AUTH_DATA,
+      StorageKeys.AUTH_DATA
     );
 
     if (authData?.token) {
@@ -105,7 +125,7 @@ apiClientV1.interceptors.request.use(
     console.log("client request error", error);
 
     return Promise.reject(error);
-  },
+  }
 );
 
 apiClientV1.interceptors.response.use(
@@ -114,13 +134,20 @@ apiClientV1.interceptors.response.use(
   },
   async function (error: AxiosError<ErrorResponse>) {
     const applicationError = makeApplicationError(error);
-    const isCsrfMismatch = applicationError.statusCode === 419
+    const isCsrfMismatch = applicationError.statusCode === 419;
+    const isUnauthenticated =
+      applicationError.statusCode === HttpStatusCode.Unauthorized;
 
-    const originalConfig = error.config! as InternalAxiosRequestConfig & { _retry: number }
+    if (isUnauthenticated) {
+      await removeAuthToken();
+    }
+
+    const originalConfig = error.config! as InternalAxiosRequestConfig & {
+      _retry: number;
+    };
     if (originalConfig._retry === undefined) {
       originalConfig._retry = 0;
     }
-
 
     if (isCsrfMismatch && originalConfig._retry < 5) {
       originalConfig._retry++;
@@ -130,7 +157,7 @@ apiClientV1.interceptors.response.use(
     }
 
     return Promise.reject(applicationError);
-  },
+  }
 );
 
 export { apiClientV1 };

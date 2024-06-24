@@ -1,8 +1,11 @@
 import React from "react";
-import { Add, Inbox } from "@mui/icons-material";
-import { useGetWalletListQuery } from "@/hooks/wallet";
+import { useSnackbar } from "notistack";
+import AppLink from "@/components/ui/AppLink";
+import { useQueryClient } from "@tanstack/react-query";
+import { Add, Delete, Inbox } from "@mui/icons-material";
 import WalletCreateModal from "@/components/WalletCreateModal";
 import FullPageSpinner from "@/components/ui/FullPageSpinner";
+import { useGetWalletDetailsQuery, useGetWalletListQuery, useRemoveWalletMutation } from "@/hooks/wallet";
 import {
   Card,
   Fab,
@@ -10,14 +13,19 @@ import {
   Tooltip,
   Typography,
   CardContent,
+  IconButton,
   CardHeader,
   CardActionArea,
+  CircularProgress,
 } from "@mui/material";
-import AppLink from "@/components/ui/AppLink";
 
 function HomePage() {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
   const [open, setOpen] = React.useState(false);
   const { data: wallets, isPending } = useGetWalletListQuery();
+  const { mutate: removeWallet, isPending: isRemovingWallet } =
+    useRemoveWalletMutation();
 
   if (isPending) {
     return <FullPageSpinner />;
@@ -29,6 +37,48 @@ function HomePage() {
 
   function handleCloseModal() {
     setOpen(false);
+  }
+
+  function handleDeleteWallet(walletId:string, event: React.MouseEvent) {
+    event.preventDefault();
+
+    removeWallet({
+      walletId
+    }, 
+    {
+      onError(error) {
+        const firstErrorMsg = Object.values(error.field_errors)[0];
+
+        if (firstErrorMsg) {
+          enqueueSnackbar({
+            message: firstErrorMsg,
+            variant: "error",
+          });
+        }
+
+        enqueueSnackbar({
+          message: error.non_field_error,
+          variant: "error",
+        });
+      },
+      onSuccess(data) {
+        if(data.success) {
+          queryClient.invalidateQueries({
+            queryKey: useGetWalletListQuery.getKey(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: useGetWalletDetailsQuery.getKey({walletId}),
+          });
+        }
+
+        enqueueSnackbar({
+          message: data.message,
+          variant: data.success ? "success" : "error",
+        });
+      },
+    }  
+  )
   }
 
   return (
@@ -51,7 +101,18 @@ function HomePage() {
                 to={`/wallets/${eachWallet.id}`}
               >
                 <Card variant="outlined">
-                  <CardHeader title={`Wallet #${i}`} />
+                  <CardHeader
+                    title={`Wallet #${i}`}
+                    action={
+                      <IconButton disabled={isRemovingWallet} onClick={handleDeleteWallet.bind(null, eachWallet.id)}>
+                        {isRemovingWallet ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <Delete />
+                        )}
+                      </IconButton>
+                    }
+                  />
                   <CardContent>
                     <Typography>Currency: {eachWallet.currency}</Typography>
                     <Typography>Balance: {eachWallet.balance}</Typography>

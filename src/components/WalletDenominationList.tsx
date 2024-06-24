@@ -1,11 +1,25 @@
-import { Inbox } from "@mui/icons-material";
+import { Delete, Inbox } from "@mui/icons-material";
 import { WalletDenominationResource } from "@/types/api-response";
-import { Card, CardContent, Grid, Typography } from "@mui/material";
+import {
+  Card,
+  Grid,
+  CardHeader,
+  Typography,
+  IconButton,
+  CardContent,
+  CircularProgress,
+} from "@mui/material";
 
 type Props = {
+  isRemoving: boolean;
   items: WalletDenominationResource[];
+  onDenominationRemove: (denominationId: string) => void;
 };
-function WalletDenominationList({ items }: Props) {
+function WalletDenominationList({
+  items,
+  onDenominationRemove,
+  isRemoving,
+}: Props) {
   if (items.length === 0) {
     return (
       <div className="text-center h-40 flex items-center justify-center flex-col">
@@ -27,7 +41,7 @@ function WalletDenominationList({ items }: Props) {
   return (
     <div className="flex gap-x-4">
       {Object.entries(groupedItems).map(([type, denominations]) => (
-        <Grid item xs={12} md={6} lg={4} className="bg-blue-50">
+        <Grid item xs={12} md={6} lg={4} className="bg-blue-50" key={type}>
           <div className="flex gap-x-4 flex-col p-2" key={type}>
             <Grid item xs={12}>
               <Typography textTransform={"uppercase"}>{type}s:</Typography>
@@ -36,8 +50,30 @@ function WalletDenominationList({ items }: Props) {
             {denominations.map((eachDenomination) => (
               <Grid item xs={12} key={eachDenomination.id}>
                 <Card variant={"outlined"}>
-                  <CardContent className="flex flex-col gap-y-2">
-                    <Typography>name: {eachDenomination.name}</Typography>
+                  <CardHeader
+                    title={eachDenomination.name}
+                    titleTypographyProps={{
+                      variant: "subtitle1",
+                      fontWeight: "bold",
+                    }}
+                    action={
+                      <IconButton
+                        disabled={isRemoving}
+                        onClick={onDenominationRemove.bind(
+                          null,
+                          eachDenomination.id
+                        )}
+                      >
+                        {isRemoving ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <Delete />
+                        )}
+                      </IconButton>
+                    }
+                    className="pb-0"
+                  />
+                  <CardContent>
                     <Typography>
                       Quantity: {eachDenomination.quantity}
                     </Typography>
