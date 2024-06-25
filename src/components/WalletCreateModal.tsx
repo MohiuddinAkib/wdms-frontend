@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useSnackbar } from "notistack";
+import { WalletResource } from "@/types/api-response";
 import { Controller, useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import LoadableButton from "@components/ui/LoadableButton";
@@ -22,6 +23,7 @@ import {
 type Props = {
   open: boolean;
   onClose?: () => void;
+  existingWallets: WalletResource[];
 };
 
 function WalletCreateModal(props: Props) {
@@ -37,6 +39,10 @@ function WalletCreateModal(props: Props) {
       currency: "",
     },
   });
+
+  const existingWallets = new Set(
+    props.existingWallets.map((eachWallet) => eachWallet.currency)
+  );
 
   const onSubmit = handleSubmit((values) => {
     createWallet(values, {
@@ -77,11 +83,16 @@ function WalletCreateModal(props: Props) {
     });
   });
 
+  function handleClose() {
+    reset();
+    props.onClose?.();
+  }
+
   return (
     <Dialog
       open={props.open}
       fullWidth={fullWidth}
-      onClose={props.onClose}
+      onClose={handleClose}
       classes={{
         paper: clsx({
           "min-w-[500px]": !fullWidth,
@@ -107,11 +118,13 @@ function WalletCreateModal(props: Props) {
                   error={invalid}
                   helperText={error?.message}
                 >
-                  {currencies?.data?.map((eachCurrency, i) => (
-                    <MenuItem key={i} value={eachCurrency.code}>
-                      {eachCurrency.name}
-                    </MenuItem>
-                  ))}
+                  {currencies?.data?.map((eachCurrency, i) =>
+                    existingWallets.has(eachCurrency.code) ? null : (
+                      <MenuItem key={i} value={eachCurrency.code}>
+                        {eachCurrency.name}
+                      </MenuItem>
+                    )
+                  )}
                 </TextField>
               );
             }}

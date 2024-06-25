@@ -139,7 +139,7 @@ function HomePage() {
         </Grid>
       )}
 
-      <WalletCreateModal open={open} onClose={handleCloseModal} />
+      <WalletCreateModal open={open} onClose={handleCloseModal} existingWallets={wallets?.data ?? []}/>
 
       <div className="fixed right-16 bottom-16">
         <Tooltip title="Create new wallet">
