@@ -5,7 +5,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Add, Delete, Inbox } from "@mui/icons-material";
 import WalletCreateModal from "@/components/WalletCreateModal";
 import FullPageSpinner from "@/components/ui/FullPageSpinner";
-import { useGetWalletDetailsQuery, useGetWalletListQuery, useRemoveWalletMutation } from "@/hooks/wallet";
+import {
+  useGetWalletDetailsQuery,
+  useGetWalletListQuery,
+  useRemoveWalletMutation,
+} from "@/hooks/wallet";
 import {
   Card,
   Fab,
@@ -17,13 +21,14 @@ import {
   CardHeader,
   CardActionArea,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 
 function HomePage() {
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
   const [open, setOpen] = React.useState(false);
-  const { data: wallets, isPending } = useGetWalletListQuery();
+  const { data: wallets, isPending, isError, error } = useGetWalletListQuery();
   const { mutate: removeWallet, isPending: isRemovingWallet } =
     useRemoveWalletMutation();
 
@@ -39,46 +44,47 @@ function HomePage() {
     setOpen(false);
   }
 
-  function handleDeleteWallet(walletId:string, event: React.MouseEvent) {
+  function handleDeleteWallet(walletId: string, event: React.MouseEvent) {
     event.preventDefault();
 
-    removeWallet({
-      walletId
-    }, 
-    {
-      onError(error) {
-        const firstErrorMsg = Object.values(error.field_errors)[0];
+    removeWallet(
+      {
+        walletId,
+      },
+      {
+        onError(error) {
+          const firstErrorMsg = Object.values(error.field_errors)[0];
 
-        if (firstErrorMsg) {
+          if (firstErrorMsg) {
+            enqueueSnackbar({
+              message: firstErrorMsg,
+              variant: "error",
+            });
+          }
+
           enqueueSnackbar({
-            message: firstErrorMsg,
+            message: error.non_field_error,
             variant: "error",
           });
-        }
+        },
+        onSuccess(data) {
+          if (data.success) {
+            queryClient.invalidateQueries({
+              queryKey: useGetWalletListQuery.getKey(),
+            });
 
-        enqueueSnackbar({
-          message: error.non_field_error,
-          variant: "error",
-        });
-      },
-      onSuccess(data) {
-        if(data.success) {
-          queryClient.invalidateQueries({
-            queryKey: useGetWalletListQuery.getKey(),
+            queryClient.invalidateQueries({
+              queryKey: useGetWalletDetailsQuery.getKey({ walletId }),
+            });
+          }
+
+          enqueueSnackbar({
+            message: data.message,
+            variant: data.success ? "success" : "error",
           });
-
-          queryClient.invalidateQueries({
-            queryKey: useGetWalletDetailsQuery.getKey({walletId}),
-          });
-        }
-
-        enqueueSnackbar({
-          message: data.message,
-          variant: data.success ? "success" : "error",
-        });
-      },
-    }  
-  )
+        },
+      }
+    );
   }
 
   return (
@@ -87,7 +93,13 @@ function HomePage() {
         Wallet List
       </Typography>
 
-      {wallets?.data?.length === 0 ? (
+      {isError ? (
+        <Grid container justifyContent={"center"}>
+          <Grid item xs={12} lg={7}>
+            <Alert color="error">{error.non_field_error}</Alert>
+          </Grid>
+        </Grid>
+      ) : wallets?.data?.length === 0 ? (
         <div className="text-center h-40 flex items-center justify-center flex-col">
           <Inbox fontSize={"large"} className="mb-4" />
           <Typography align="center">No Wallet Created</Typography>
@@ -104,7 +116,10 @@ function HomePage() {
                   <CardHeader
                     title={`Wallet #${i}`}
                     action={
-                      <IconButton disabled={isRemovingWallet} onClick={handleDeleteWallet.bind(null, eachWallet.id)}>
+                      <IconButton
+                        disabled={isRemovingWallet}
+                        onClick={handleDeleteWallet.bind(null, eachWallet.id)}
+                      >
                         {isRemovingWallet ? (
                           <CircularProgress size={20} />
                         ) : (

@@ -14,12 +14,18 @@ import {
   CardActions,
   Pagination,
   CardHeader,
+  Alert,
 } from "@mui/material";
 
 function TransactionListPage() {
   const [page, setPage] = React.useState(1);
 
-  const { data: transactionList, isPending } = useGetTransactionListQuery({
+  const {
+    data: transactionList,
+    isPending,
+    isError,
+    error,
+  } = useGetTransactionListQuery({
     variables: {
       page,
     },
@@ -94,26 +100,32 @@ function TransactionListPage() {
         </Typography>
       </Grid>
 
-      <Grid item xs={12} lg={10}>
-        <Card variant="outlined">
-          <CardHeader />
-          <List className="h-[600px] overflow-y-auto">
-            {listItems.length > 0 ? (
-              listItems
-            ) : (
-              <Typography>No Transacitons found</Typography>
-            )}
-          </List>
+      {isError ? (
+        <Grid item xs={12} lg={7}>
+          <Alert color="error">{error.non_field_error}</Alert>
+        </Grid>
+      ) : (
+        <Grid item xs={12} lg={10}>
+          <Card variant="outlined">
+            <CardHeader />
+            <List className="h-[600px] overflow-y-auto">
+              {listItems.length > 0 ? (
+                listItems
+              ) : (
+                <Typography>No Transacitons found</Typography>
+              )}
+            </List>
 
-          <CardActions className="justify-center">
-            <Pagination
-              page={page}
-              onChange={handlePageChange}
-              count={transactionList?.last_page ?? 1}
-            />
-          </CardActions>
-        </Card>
-      </Grid>
+            <CardActions className="justify-center">
+              <Pagination
+                page={page}
+                onChange={handlePageChange}
+                count={transactionList?.last_page ?? 1}
+              />
+            </CardActions>
+          </Card>
+        </Grid>
+      )}
     </Grid>
   );
 }
